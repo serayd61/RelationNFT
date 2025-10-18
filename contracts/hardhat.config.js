@@ -4,20 +4,39 @@ require('dotenv').config({ path: '../.env' });
 module.exports = {
   solidity: "0.8.20",
   networks: {
-    base: {
-      url: process.env.BASE_RPC_URL || "https://mainnet.base.org",
-      accounts: [process.env.DEPLOYER_PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000000"],
-      chainId: 8453
+    baseSepolia: {
+      url: "https://sepolia.base.org",
+      accounts: [process.env.DEPLOYER_PRIVATE_KEY],
+      chainId: 84532
     },
-    baseGoerli: {
-      url: "https://goerli.base.org",
-      accounts: [process.env.DEPLOYER_PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000000"],
-      chainId: 84531
+    base: {
+      url: "https://mainnet.base.org",
+      accounts: [process.env.DEPLOYER_PRIVATE_KEY],
+      chainId: 8453
     }
   },
   etherscan: {
-    apiKey: {
-      base: process.env.BASESCAN_API_KEY || ""
-    }
+    apiKey: "3FT255PAB1FYJUA7ZSVGH76NDPI9CVPRRZ",
+    customChains: [
+      {
+        network: "baseSepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org"
+        }
+      },
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org"
+        }
+      }
+    ]
+  },
+  sourcify: {
+    enabled: false
   }
 };
