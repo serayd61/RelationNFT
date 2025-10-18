@@ -1,0 +1,21 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhhYmNkZWYifQ",
+    "payload": "eyJkb21haW4iOiJyZWxhdGlvbm5mdC5jb20ifQ",
+    "signature": "MHhhYmNkZWYxMjM0NTY3ODkw"
+  },
+  "frame": {
+    "version": "next",
+    "imageUrl": "https://relationnft.com/og-image.png",
+    "button": {
+      "title": "Open RelationNFT",
+      "action": {
+        "type": "launch_frame",
+        "name": "RelationNFT",
+        "url": "https://relationnft.com"
+      }
+    }
+  },
+  "name": "RelationNFT",
+  "description": "Immortalize Your Farcaster Relationships"
+}
