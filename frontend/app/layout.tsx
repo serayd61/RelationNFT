@@ -1,34 +1,98 @@
 import type { Metadata } from "next";
-import "./globals.css"; // varsa
+import "./globals.css";
 
-// Embed JSON'un sabit hali
+// Base Mini App Embed Configuration
 const embed = {
   version: "1",
-  imageUrl: "https://relationnft.vercel.app/image.png", // 3:2 oran, <10MB
+  imageUrl: "https://relationnft.vercel.app/image.png", // 3:2 aspect ratio, <10MB
   button: {
-    title: "Open RelationNFT",
+    title: "Launch RelationNFT",
     action: {
-      type: "launch_miniapp",
+      type: "launch_frame",
       url: "https://relationnft.vercel.app",
     },
   },
 };
 
 export const metadata: Metadata = {
-  title: "RelationNFT",
-  description: "Transform your Farcaster connections into valuable NFTs on Base",
+  title: "RelationNFT - NFT your connections",
+  description:
+    "Mint dual NFTs that celebrate Farcaster relationships. Hit milestones with friends and unlock collectibles that immortalize your connections on-chain.",
+  
+  // Icons
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
+
+  // Open Graph
   openGraph: {
-    title: "RelationNFT",
+    title: "Farcaster Relationship NFTs",
     description:
       "Transform your Farcaster connections into valuable NFTs on Base",
     url: "https://relationnft.vercel.app",
-    images: ["https://relationnft.vercel.app/image.png"],
+    siteName: "RelationNFT",
+    images: [
+      {
+        url: "https://relationnft.vercel.app/image.png",
+        width: 1200,
+        height: 630,
+        alt: "RelationNFT - Farcaster Relationship NFTs",
+      },
+    ],
+    type: "website",
+    locale: "en_US",
   },
-  // Burada özel meta'ları veriyoruz
+
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "Farcaster Relationship NFTs",
+    description:
+      "Transform your Farcaster connections into valuable NFTs on Base",
+    images: ["https://relationnft.vercel.app/image.png"],
+    creator: "@relationnft",
+  },
+
+  // Base Mini App specific metadata
   other: {
+    // Primary miniapp metadata (new standard)
     "fc:miniapp": JSON.stringify(embed),
-    // (Opsiyonel) geri uyumluluk
+    
+    // Backward compatibility
     "fc:frame": JSON.stringify(embed),
+    
+    // Additional metadata for better discoverability
+    "fc:frame:image": "https://relationnft.vercel.app/image.png",
+    "fc:frame:image:aspect_ratio": "3:2",
+  },
+
+  // Manifest
+  manifest: "/manifest.json",
+
+  // Keywords for SEO
+  keywords: [
+    "Farcaster",
+    "NFT",
+    "Base",
+    "Blockchain",
+    "Social",
+    "Relationships",
+    "Web3",
+  ],
+
+  // App metadata
+  applicationName: "RelationNFT",
+  authors: [{ name: "relationnft", url: "https://warpcast.com/relationnft" }],
+  
+  // Theme color matching splash screen
+  themeColor: "#5b21b6",
+  
+  // Viewport
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
   },
 };
 
@@ -39,6 +103,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Preload critical assets */}
+        <link rel="preload" href="/icon.png" as="image" />
+        
+        {/* Additional meta tags for better compatibility */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="RelationNFT" />
+      </head>
       <body>{children}</body>
     </html>
   );
