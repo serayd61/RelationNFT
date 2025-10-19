@@ -5,14 +5,14 @@ import { Providers } from "./providers";
 // Base Mini App Embed Configuration
 const embed = {
   version: "1",
-  imageUrl: "https://relationnft.vercel.app/splash.png", // 3:2 aspect ratio, <10MB
+  imageUrl: "https://relationnft.vercel.app/image.png?v=1", // 3:2 aspect ratio, <10MB
   button: {
     title: "Launch RelationNFT",
     action: {
       type: "launch_frame",
       name: "RelationNFT",
       url: "https://relationnft.vercel.app",
-      splashImageUrl: "https://relationnft.vercel.app/splash.png",
+      splashImageUrl: "https://relationnft.vercel.app/splash.png?v=1",
       splashBackgroundColor: "#5b21b6",
     },
   },
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   
   // Icons
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png",
+    icon: "/icon.png?v=1",
+    apple: "/icon.png?v=1",
   },
 
   // Open Graph
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: "RelationNFT",
     images: [
       {
-        url: "https://relationnft.vercel.app/image.png",
+        url: "https://relationnft.vercel.app/og-image.png?v=1",
         width: 1200,
         height: 630,
         alt: "RelationNFT - Farcaster Relationship NFTs",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "Farcaster Relationship NFTs",
     description:
       "Transform your Farcaster connections into valuable NFTs on Base",
-    images: ["https://relationnft.vercel.app/image.png"],
+    images: ["https://relationnft.vercel.app/og-image.png?v=1"],
     creator: "@relationnft",
   },
 
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     "fc:frame": JSON.stringify(embed),
     
     // Additional metadata for better discoverability
-    "fc:frame:image": "https://relationnft.vercel.app/image.png",
+    "fc:frame:image": "https://relationnft.vercel.app/image.png?v=1",
     "fc:frame:image:aspect_ratio": "3:2",
   },
 
@@ -109,7 +109,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Preload critical assets */}
-        <link rel="preload" href="/icon.png" as="image" />
+        <link rel="preload" href="/icon.png?v=1" as="image" />
         
         {/* Additional meta tags for better compatibility */}
         <meta name="format-detection" content="telephone=no" />
