@@ -10,6 +10,7 @@ const embed = {
     title: "Launch RelationNFT",
     action: {
       type: "launch_frame",
+      name: "RelationNFT",
       url: "https://relationnft.vercel.app",
     },
   },
