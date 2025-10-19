@@ -1,24 +1,36 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { Providers } from './providers'
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const embed = {
+    version: "1",
+    imageUrl: "https://relationnft.vercel.app/image.png", // 3:2, <10MB
+    button: {
+      title: "Open RelationNFT",
+      action: {
+        type: "launch_miniapp",
+        url: "https://relationnft.vercel.app"
+      }
+    }
+  };
 
-export const metadata: Metadata = {
-  title: 'RelationNFT - Farcaster Relationship NFTs',
-  description: 'Transform your Farcaster connections into valuable NFTs',
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
   return (
     <html lang="en">
-      <body>
-        <Providers>
-          {children}
-        </Providers>
-      </body>
+      <head>
+        {/* Farcaster/Base Mini App Embed */}
+        <meta name="fc:miniapp" content={JSON.stringify(embed)} />
+        {/* (Opsiyonel) Geri uyumluluk */}
+        <meta
+          name="fc:frame"
+          content={JSON.stringify({
+            ...embed,
+            button: { ...embed.button, action: { ...embed.button.action } }
+          })}
+        />
+        {/* OG tagleri (opsiyonel ama faydalı) */}
+        <meta property="og:title" content="RelationNFT" />
+        <meta property="og:description" content="Transform your Farcaster connections into valuable NFTs on Base" />
+        <meta property="og:image" content="https://relationnft.vercel.app/image.png" />
+        <meta property="og:url" content="https://relationnft.vercel.app" />
+      </head>
+      <body>{children}</body>
     </html>
-  )
+  );
 }
