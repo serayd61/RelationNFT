@@ -1,0 +1,31 @@
+{
+  "frame": {
+    "name": "RelationNFT",
+    "version": "1",
+    "iconUrl": "https://relationnft.vercel.app/icon.png",
+    "homeUrl": "https://relationnft.vercel.app",
+    "imageUrl": "https://relationnft.vercel.app/image.png",
+    "buttonTitle": "Open RelationNFT",
+    "splashImageUrl": "https://relationnft.vercel.app/splash.png",
+    "splashBackgroundColor": "#5b21b6",
+    "webhookUrl": "https://relationnft.vercel.app/api/webhook",
+    "description": "Immortalize your meaningful Farcaster relationships through unique, dual NFTs. Each milestone you achieve with another user unlocks exclusive collectible NFTs that represent your connection on the blockchain.",
+    "subtitle": "Transform Connections into NFTs",
+    "primaryCategory": "social",
+    "tags": [
+      "web3",
+      "nft",
+      "base",
+      "blockchain",
+      "farcaster"
+    ],
+    "tagline": "Every connection matters",
+    "ogTitle": "Farcaster Relationship NFTs",
+    "ogDescription": "Transform your Farcaster connections into valuable NFTs on Base"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIwODY0NiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM1NjhlQTVjY0M2OEVkMDE5NDNFODQ3YWVDMTY2MTY3NTA2NDhENjUifQ",
+    "payload": "eyJkb21haW4iOiJyZWxhdGlvbm5mdC52ZXJjZWwuYXBwIn0",
+    "signature": "B5nDX93obh1EGxW+UYc0k+hkvKxaROiw9KCQXbJsF+9T46K0FbB60XduqQksGXCsIfxLNlCeW6NaJRJl8yrlHhw="
+  }
+}
