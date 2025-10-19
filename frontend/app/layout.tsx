@@ -5,13 +5,15 @@ import { Providers } from "./providers";
 // Base Mini App Embed Configuration
 const embed = {
   version: "1",
-  imageUrl: "https://relationnft.vercel.app/image.png", // 3:2 aspect ratio, <10MB
+  imageUrl: "https://relationnft.vercel.app/splash.png", // 3:2 aspect ratio, <10MB
   button: {
     title: "Launch RelationNFT",
     action: {
       type: "launch_frame",
       name: "RelationNFT",
       url: "https://relationnft.vercel.app",
+      splashImageUrl: "https://relationnft.vercel.app/splash.png",
+      splashBackgroundColor: "#5b21b6",
     },
   },
 };
