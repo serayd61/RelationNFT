@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Users, Gift, TrendingUp, Award, Heart, Zap } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
 
 export default function RelationNFTApp() {
+  const { address, isConnected } = useAccount();
   const [activeTab, setActiveTab] = useState('overview');
   const [userStats, setUserStats] = useState({
     totalRelationships: 0,
@@ -17,9 +20,7 @@ export default function RelationNFTApp() {
   const [milestones, setMilestones] = useState([]);
   const [pendingNFTs, setPendingNFTs] = useState([]);
 
-  // Simulated data - gerçek uygulamada Farcaster API'den gelecek
   useEffect(() => {
-    // Simulate loading user data
     setTimeout(() => {
       setUserStats({
         totalRelationships: 24,
@@ -95,11 +96,7 @@ export default function RelationNFTApp() {
   }, []);
 
   const handleMintNFT = async (nftId) => {
-    // Simulated minting process
     alert(`🎨 Minting NFT #${nftId}...\n\nThis will create a dual NFT for both you and your partner!\n\nEstimated gas fee: $0.50 on Base Network`);
-    
-    // In real app, this would call the smart contract
-    // const tx = await contract.mintRelationNFT(partnerId, milestoneType);
   };
 
   const NFTCard = ({ relationship }) => {
@@ -183,11 +180,16 @@ export default function RelationNFTApp() {
               </h1>
               <p className="text-purple-300">Immortalize Your Farcaster Connections</p>
             </div>
-            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-2 rounded-lg">
-              <p className="text-sm text-white/80">Total NFTs</p>
-              <p className="text-2xl font-bold">{userStats.nftsMinted}</p>
-            </div>
+            <ConnectButton />
           </div>
+
+          {/* Wallet Info */}
+          {isConnected && address && (
+            <div className="mt-4 p-4 bg-black/30 rounded-lg">
+              <p className="text-sm text-purple-300">Connected Wallet</p>
+              <p className="text-white font-mono text-sm">{address.slice(0, 6)}...{address.slice(-4)}</p>
+            </div>
+          )}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-4 gap-4 mt-6">
@@ -208,7 +210,7 @@ export default function RelationNFTApp() {
             </div>
             <div className="bg-black/30 rounded-lg p-4 text-center">
               <TrendingUp className="mx-auto mb-2 text-yellow-400" size={24} />
-              <p className="text-2xl font-bold">{userStats.topSupporter}</p>
+              <p className="text-xl font-bold">{userStats.topSupporter}</p>
               <p className="text-xs text-purple-300">Top Supporter</p>
             </div>
           </div>
@@ -280,9 +282,10 @@ export default function RelationNFTApp() {
                     <button
                       onClick={() => handleMintNFT(nft.id)}
                       className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2"
+                      disabled={!isConnected}
                     >
                       <Sparkles size={20} />
-                      Mint NFT Now
+                      {isConnected ? 'Mint NFT Now' : 'Connect Wallet to Mint'}
                     </button>
                   </div>
                 ))}
