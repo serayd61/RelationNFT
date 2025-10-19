@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Users, Gift, TrendingUp, Award, Heart, Zap } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
+import { useMiniApp } from './hooks/useMiniApp';
 
 export default function RelationNFTApp() {
   const { address, isConnected } = useAccount();
+  const { isReady, context } = useMiniApp();
   const [activeTab, setActiveTab] = useState('overview');
   const [userStats, setUserStats] = useState({
     totalRelationships: 0,
@@ -105,6 +107,8 @@ export default function RelationNFTApp() {
       if (status === 'ready') return 'bg-yellow-500';
       return 'bg-gray-400';
     };
+   
+
 
     const getStatusText = (status) => {
       if (status === 'minted') return 'NFT Minted';
@@ -166,7 +170,13 @@ export default function RelationNFTApp() {
       </div>
     );
   };
-
+if (!isReady) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 flex items-center justify-center">
+      <div className="text-white text-xl">Loading RelationNFT...</div>
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 text-white p-4">
       {/* Header */}
