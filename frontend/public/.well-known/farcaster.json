@@ -24,8 +24,14 @@
     "ogDescription": "Transform your Farcaster connections into valuable NFTs on Base"
   },
   "accountAssociation": {
+<<<<<<< HEAD
     "header": "eyJmaWQiOjIwODY0NiwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGYwZTBlNTQwMjgyOUMyNzI3ZDhiNWEzZGY5MmI0NEQzRDM1N0VlQTcifQ",
     "payload": "eyJkb21haW4iOiJyZWxhdGlvbm5mdC52ZXJjZWwuYXBwIn0",
     "signature": "7wdEj5TcOSKm5Yk1H82Y0d9P3sVNEJAoikM7l+XtRfBrq4KYoh4AotI7cRHUxaSNxTjuaF6/N0CNH7GeDL7mlxs="
+=======
+    "header": "eyJmaWQiOjIwODY0NiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM1NjhlQTVjY0M2OEVkMDE5NDNFODQ3YWVDMTY2MTY3NTA2NDhENjUifQ",
+    "payload": "eyJkb21haW4iOiJyZWxhdGlvbm5mdC52ZXJjZWwuYXBwIn0",
+    "signature": "B5nDX93obh1EGxW+UYc0k+hkvKxaROiw9KCQXbJsF+9T46K0FbB60XduqQksGXCsIfxLNlCeW6NaJRJl8yrlHhw="
+>>>>>>> fc-fix-keep
   }
 }
