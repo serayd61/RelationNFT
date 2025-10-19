@@ -9,13 +9,16 @@
     "splashImageUrl": "https://relationnft.vercel.app/splash.png",
     "splashBackgroundColor": "#5b21b6",
     "webhookUrl": "https://relationnft.vercel.app/api/webhook",
-    "description": "Immortalize your meaningful Farcaster relationships through unique, dual NFTs. Each milestone you achieve with another user unlocks exclusive collectible NFTs that represent your connection on the blockchain.",
-    "subtitle": "Transform Connections into NFTs",
+    "subtitle": "Turn Connections into NFTs",
+    "description": "Mint dual NFTs that celebrate your Farcaster relationships. Hit milestones with friends and unlock collectible tokens that immortalize your connections on-chain.",
     "primaryCategory": "social",
-    "tags": ["web3","nft","base","blockchain","farcaster"],
+    "tags": ["web3", "nft", "base", "blockchain", "farcaster"],
     "tagline": "Every connection matters",
     "ogTitle": "Farcaster Relationship NFTs",
-    "ogDescription": "Transform your Farcaster connections into valuable NFTs on Base"
+    "ogDescription": "Transform your Farcaster connections into valuable NFTs on Base",
+    "heroImageUrl": "https://relationnft.vercel.app/splash.png",
+    "ogImageUrl": "https://relationnft.vercel.app/image.png",
+    "castShareUrl": "https://warpcast.com/~/compose?text=Check%20out%20RelationNFT%20https%3A%2F%2Frelationnft.vercel.app"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjIwODY0NiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM1NjhlQTVjY0M2OEVkMDE5NDNFODQ3YWVDMTY2MTY3NTA2NDhENjUifQ",
