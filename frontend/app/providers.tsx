@@ -1,6 +1,7 @@
 'use client';
 
 import '@rainbow-me/rainbowkit/styles.css';
+import { useState } from 'react';
 import {
   getDefaultConfig,
   RainbowKitProvider,
@@ -19,9 +20,10 @@ const config = getDefaultConfig({
   ssr: true,
 });
 
-const queryClient = new QueryClient();
-
 export function Providers({ children }: { children: React.ReactNode }) {
+  // QueryClient'i useState ile oluştur - her render'da yeni instance oluşturulmasını engeller
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
