@@ -1,388 +1,294 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Users, Gift, TrendingUp, Award, Heart, Zap } from 'lucide-react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
-import { useMiniApp } from './hooks/useMiniApp';
+import { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 
-export default function RelationNFTApp() {
-  const { address, isConnected } = useAccount();
-  const { isReady, context } = useMiniApp();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [userStats, setUserStats] = useState({
-    totalRelationships: 0,
-    nftsMinted: 0,
-    topSupporter: null,
-    totalTipsGiven: 0,
-    totalTipsReceived: 0
-  });
-  
-  const [relationships, setRelationships] = useState([]);
-  const [milestones, setMilestones] = useState([]);
-  const [pendingNFTs, setPendingNFTs] = useState([]);
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '';
+const BASE_RPC_URL = "https://mainnet.base.org";
 
-  useEffect(() => {
-    setTimeout(() => {
-      setUserStats({
-        totalRelationships: 24,
-        nftsMinted: 7,
-        topSupporter: '@cryptowhale',
-        totalTipsGiven: 156.50,
-        totalTipsReceived: 234.75
+export default function Home() {
+  const [account, setAccount] = useState<string>('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
+  const [error, setError] = useState<string>('');
+
+  // Stats data (örnek - backend'den gelecek)
+  const stats = {
+    relationships: 24,
+    tipsReceived: 234.75,
+    tipsGiven: 156.5,
+    topSupporter: '@cryptowhale'
+  };
+
+  const connectWallet = async () => {
+    try {
+      setIsConnecting(true);
+      setError('');
+
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('Please install MetaMask!');
+      }
+
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
       });
 
-      setRelationships([
-        {
-          id: 1,
-          username: '@cryptowhale',
-          avatar: '🐋',
-          interactions: 142,
-          tipsExchanged: 89.50,
-          nftStatus: 'minted',
-          nftType: 'Golden Bond',
-          firstInteraction: '2025-01-15',
-          milestone: 'Top Supporter'
-        },
-        {
-          id: 2,
-          username: '@degenbuilder',
-          avatar: '🛠️',
-          interactions: 89,
-          tipsExchanged: 45.20,
-          nftStatus: 'ready',
-          nftType: 'Co-Creator',
-          firstInteraction: '2025-02-01',
-          milestone: 'Conversation Partners'
-        },
-        {
-          id: 3,
-          username: '@nftcollector',
-          avatar: '🎨',
-          interactions: 67,
-          tipsExchanged: 32.10,
-          nftStatus: 'progress',
-          nftType: null,
-          firstInteraction: '2025-03-10',
-          milestone: null
-        }
-      ]);
+      if (accounts.length === 0) {
+        throw new Error('No accounts found');
+      }
 
-      setPendingNFTs([
-        {
-          id: 1,
-          partner: '@degenbuilder',
-          type: 'Conversation Partners',
-          description: '50+ meaningful conversations',
-          readyToMint: true,
-          estimatedValue: '$15-25'
-        },
-        {
-          id: 2,
-          partner: '@nftcollector',
-          type: 'First Supporter',
-          description: 'Gave you your first $1+ tip',
-          readyToMint: true,
-          estimatedValue: '$10-20'
-        }
-      ]);
+      setAccount(accounts[0]);
 
-      setMilestones([
-        { name: 'First Supporter', progress: 100, unlocked: true },
-        { name: 'Conversation Partners', progress: 100, unlocked: true },
-        { name: 'Co-Creator', progress: 75, unlocked: false },
-        { name: 'Mutual Whale', progress: 45, unlocked: false },
-        { name: 'Golden Bond', progress: 100, unlocked: true }
-      ]);
-    }, 500);
+      // Base network check
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      const baseChainId = '0x2105'; // Base Mainnet
+      
+      if (chainId !== baseChainId) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: baseChainId }],
+          });
+        } catch (switchError: any) {
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: baseChainId,
+                chainName: 'Base',
+                nativeCurrency: {
+                  name: 'Ethereum',
+                  symbol: 'ETH',
+                  decimals: 18
+                },
+                rpcUrls: ['https://mainnet.base.org'],
+                blockExplorerUrls: ['https://basescan.org']
+              }]
+            });
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error('Connection error:', err);
+      setError(err.message || 'Failed to connect wallet');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const mintNFT = async () => {
+    try {
+      setIsMinting(true);
+      setError('');
+
+      if (!account) {
+        throw new Error('Please connect your wallet first');
+      }
+
+      // Mint logic here
+      alert('NFT Minting initiated! 🎉');
+      
+    } catch (err: any) {
+      console.error('Mint error:', err);
+      setError(err.message || 'Failed to mint NFT');
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window.ethereum !== 'undefined') {
+      window.ethereum.on('accountsChanged', (accounts: string[]) => {
+        setAccount(accounts[0] || '');
+      });
+
+      window.ethereum.on('chainChanged', () => {
+        window.location.reload();
+      });
+    }
+
+    return () => {
+      if (typeof window.ethereum !== 'undefined') {
+        window.ethereum.removeAllListeners('accountsChanged');
+        window.ethereum.removeAllListeners('chainChanged');
+      }
+    };
   }, []);
 
-  const handleMintNFT = async (nftId) => {
-    alert(`🎨 Minting NFT #${nftId}...\n\nThis will create a dual NFT for both you and your partner!\n\nEstimated gas fee: $0.50 on Base Network`);
-  };
-
-  const NFTCard = ({ relationship }) => {
-    const getStatusColor = (status) => {
-      if (status === 'minted') return 'bg-green-500';
-      if (status === 'ready') return 'bg-yellow-500';
-      return 'bg-gray-400';
-    };
-   
-
-
-    const getStatusText = (status) => {
-      if (status === 'minted') return 'NFT Minted';
-      if (status === 'ready') return 'Ready to Mint';
-      return 'In Progress';
-    };
-
-    return (
-      <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 rounded-xl p-6 shadow-2xl border border-purple-500 hover:border-purple-400 transition-all">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="text-4xl">{relationship.avatar}</div>
-            <div>
-              <h3 className="text-white font-bold text-lg">{relationship.username}</h3>
-              <p className="text-purple-300 text-sm">Since {relationship.firstInteraction}</p>
-            </div>
-          </div>
-          <div className={`${getStatusColor(relationship.nftStatus)} text-white text-xs px-3 py-1 rounded-full font-semibold`}>
-            {getStatusText(relationship.nftStatus)}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-black/30 rounded-lg p-3">
-            <p className="text-purple-300 text-xs mb-1">Interactions</p>
-            <p className="text-white font-bold text-xl">{relationship.interactions}</p>
-          </div>
-          <div className="bg-black/30 rounded-lg p-3">
-            <p className="text-purple-300 text-xs mb-1">Tips Exchanged</p>
-            <p className="text-white font-bold text-xl">${relationship.tipsExchanged}</p>
-          </div>
-        </div>
-
-        {relationship.milestone && (
-          <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 rounded-lg p-3 mb-4">
-            <div className="flex items-center gap-2">
-              <Award className="text-white" size={20} />
-              <p className="text-white font-semibold">{relationship.milestone}</p>
-            </div>
-          </div>
-        )}
-
-        {relationship.nftStatus === 'ready' && (
-          <button
-            onClick={() => handleMintNFT(relationship.id)}
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 rounded-lg hover:from-pink-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2"
-          >
-            <Sparkles size={20} />
-            Mint Relationship NFT
-          </button>
-        )}
-
-        {relationship.nftStatus === 'minted' && (
-          <button className="w-full bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 cursor-default">
-            <Award size={20} />
-            View NFT Collection
-          </button>
-        )}
-      </div>
-    );
-  };
-if (!isReady) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 flex items-center justify-center">
-      <div className="text-white text-xl">Loading RelationNFT...</div>
-    </div>
-  );
-}
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 text-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 text-white">
       {/* Header */}
-      <div className="max-w-6xl mx-auto mb-8">
-        <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30">
-          <div className="flex items-center justify-between mb-4">
+      <header className="p-4 flex items-center justify-between max-w-7xl mx-auto">
+        <div className="flex items-center gap-4">
+          <button className="w-10 h-10 rounded-full bg-gray-800/50 flex items-center justify-center">
+            ✕
+          </button>
+          <button className="w-10 h-10 rounded-full bg-gray-800/50 flex items-center justify-center">
+            ⌄
+          </button>
+        </div>
+        <div className="text-center">
+          <h1 className="text-xl font-bold">RelationNFT</h1>
+          <p className="text-sm text-gray-400">by seayd61</p>
+        </div>
+        <button className="w-10 h-10 rounded-full bg-gray-800/50 flex items-center justify-center">
+          ⋯
+        </button>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Hero Card */}
+        <div className="bg-gradient-to-br from-purple-600/40 to-pink-600/40 backdrop-blur-xl rounded-3xl p-6 mb-6 border border-purple-500/30">
+          <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                <Sparkles className="text-yellow-400" size={32} />
+              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                <span className="text-4xl">⭐</span>
                 RelationNFT
-              </h1>
-              <p className="text-purple-300">Immortalize Your Farcaster Connections</p>
+              </h2>
+              <p className="text-gray-200 text-lg">
+                Immortalize Your Farcaster Connections
+              </p>
             </div>
-            <ConnectButton />
+            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-full transition-colors">
+              Connect Wallet
+            </button>
           </div>
 
-          {/* Wallet Info */}
-          {isConnected && address && (
-            <div className="mt-4 p-4 bg-black/30 rounded-lg">
-              <p className="text-sm text-purple-300">Connected Wallet</p>
-              <p className="text-white font-mono text-sm">{address.slice(0, 6)}...{address.slice(-4)}</p>
+          {/* Stats Grid - FIXED LAYOUT */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Relationships */}
+            <div className="bg-purple-900/40 backdrop-blur-sm rounded-2xl p-4 border border-purple-500/20">
+              <div className="text-blue-400 text-2xl mb-2">👥</div>
+              <div className="text-3xl font-bold mb-1">{stats.relationships}</div>
+              <div className="text-sm text-gray-300">Relationships</div>
             </div>
-          )}
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
-            <div className="bg-black/30 rounded-lg p-4 text-center">
-              <Users className="mx-auto mb-2 text-blue-400" size={24} />
-              <p className="text-2xl font-bold">{userStats.totalRelationships}</p>
-              <p className="text-xs text-purple-300">Relationships</p>
+            {/* Tips Received */}
+            <div className="bg-purple-900/40 backdrop-blur-sm rounded-2xl p-4 border border-purple-500/20">
+              <div className="text-green-400 text-2xl mb-2">🎁</div>
+              <div className="text-2xl font-bold mb-1 break-words">
+                ${stats.tipsReceived}
+              </div>
+              <div className="text-sm text-gray-300">Tips Received</div>
             </div>
-            <div className="bg-black/30 rounded-lg p-4 text-center">
-              <Gift className="mx-auto mb-2 text-green-400" size={24} />
-              <p className="text-2xl font-bold">${userStats.totalTipsReceived}</p>
-              <p className="text-xs text-purple-300">Tips Received</p>
+
+            {/* Tips Given */}
+            <div className="bg-purple-900/40 backdrop-blur-sm rounded-2xl p-4 border border-purple-500/20">
+              <div className="text-pink-400 text-2xl mb-2">💝</div>
+              <div className="text-2xl font-bold mb-1 break-words">
+                ${stats.tipsGiven}
+              </div>
+              <div className="text-sm text-gray-300">Tips Given</div>
             </div>
-            <div className="bg-black/30 rounded-lg p-4 text-center">
-              <Heart className="mx-auto mb-2 text-pink-400" size={24} />
-              <p className="text-2xl font-bold">${userStats.totalTipsGiven}</p>
-              <p className="text-xs text-purple-300">Tips Given</p>
-            </div>
-            <div className="bg-black/30 rounded-lg p-4 text-center">
-              <TrendingUp className="mx-auto mb-2 text-yellow-400" size={24} />
-              <p className="text-xl font-bold">{userStats.topSupporter}</p>
-              <p className="text-xs text-purple-300">Top Supporter</p>
+
+            {/* Top Supporter */}
+            <div className="bg-purple-900/40 backdrop-blur-sm rounded-2xl p-4 border border-purple-500/20">
+              <div className="text-yellow-400 text-2xl mb-2">📈</div>
+              <div className="text-lg font-bold mb-1 truncate">
+                {stats.topSupporter}
+              </div>
+              <div className="text-sm text-gray-300">Top Supporter</div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="max-w-6xl mx-auto mb-6">
-        <div className="flex gap-2 bg-black/30 rounded-xl p-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-              activeTab === 'overview'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                : 'text-purple-300 hover:text-white'
-            }`}
-          >
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold px-8 py-3 rounded-2xl">
             Overview
           </button>
-          <button
-            onClick={() => setActiveTab('relationships')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-              activeTab === 'relationships'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                : 'text-purple-300 hover:text-white'
-            }`}
-          >
+          <button className="bg-gray-800/30 text-gray-300 font-semibold px-8 py-3 rounded-2xl hover:bg-gray-800/50 transition-colors">
             Relationships
           </button>
-          <button
-            onClick={() => setActiveTab('milestones')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-              activeTab === 'milestones'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                : 'text-purple-300 hover:text-white'
-            }`}
-          >
+          <button className="bg-gray-800/30 text-gray-300 font-semibold px-8 py-3 rounded-2xl hover:bg-gray-800/50 transition-colors">
             Milestones
           </button>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto">
-        {activeTab === 'overview' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <Zap className="text-yellow-400" />
-              Ready to Mint
-            </h2>
-            {pendingNFTs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {pendingNFTs.map((nft) => (
-                  <div key={nft.id} className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 rounded-xl p-6 border border-yellow-500/50">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-yellow-300">{nft.type}</h3>
-                        <p className="text-white/80 text-sm">with {nft.partner}</p>
-                      </div>
-                      <div className="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-semibold animate-pulse">
-                        Ready!
-                      </div>
-                    </div>
-                    <p className="text-white/70 text-sm mb-4">{nft.description}</p>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm text-white/60">Est. Value:</span>
-                      <span className="text-lg font-bold text-green-400">{nft.estimatedValue}</span>
-                    </div>
-                    <button
-                      onClick={() => handleMintNFT(nft.id)}
-                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2"
-                      disabled={!isConnected}
-                    >
-                      <Sparkles size={20} />
-                      {isConnected ? 'Mint NFT Now' : 'Connect Wallet to Mint'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-black/30 rounded-xl p-8 text-center mb-8">
-                <p className="text-purple-300">No NFTs ready to mint yet. Keep building relationships!</p>
-              </div>
-            )}
+        {/* Ready to Mint Section */}
+        <div className="mb-4">
+          <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span className="text-yellow-400">⚡</span>
+            Ready to Mint
+          </h3>
+        </div>
 
-            <h2 className="text-2xl font-bold mb-4">Recent Relationships</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relationships.slice(0, 3).map((rel) => (
-                <NFTCard key={rel.id} relationship={rel} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'relationships' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">All Relationships</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relationships.map((rel) => (
-                <NFTCard key={rel.id} relationship={rel} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'milestones' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Achievement Milestones</h2>
-            <div className="space-y-4">
-              {milestones.map((milestone, index) => (
-                <div key={index} className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 rounded-xl p-6 border border-purple-500/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      {milestone.unlocked ? (
-                        <Award className="text-yellow-400" size={24} />
-                      ) : (
-                        <Award className="text-gray-600" size={24} />
-                      )}
-                      <h3 className="text-lg font-bold">{milestone.name}</h3>
-                    </div>
-                    <span className={`text-sm font-semibold ${milestone.unlocked ? 'text-green-400' : 'text-yellow-400'}`}>
-                      {milestone.progress}%
-                    </span>
-                  </div>
-                  <div className="bg-black/30 rounded-full h-3 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        milestone.unlocked
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                          : 'bg-gradient-to-r from-yellow-500 to-orange-500'
-                      }`}
-                      style={{ width: `${milestone.progress}%` }}
-                    />
-                  </div>
+        {/* Mint Cards */}
+        <div className="space-y-4">
+          {/* Conversation Partners Card */}
+          <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 backdrop-blur-xl rounded-3xl p-6 border border-orange-500/30">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h4 className="text-2xl font-bold mb-2 text-yellow-300">
+                  Conversation Partners
+                </h4>
+                <p className="text-gray-200 mb-2">with @degenbuilder</p>
+                <p className="text-gray-300 text-sm mb-4">
+                  50+ meaningful conversations
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Est. Value:</span>
+                  <span className="text-2xl font-bold text-green-400">
+                    $15-25
+                  </span>
                 </div>
-              ))}
+              </div>
+              <div className="bg-green-500 text-white text-sm font-bold px-4 py-1 rounded-full">
+                Ready!
+              </div>
             </div>
+            
+            {/* FIXED BUTTON - İngilizce */}
+            <button 
+              onClick={mintNFT}
+              disabled={isMinting || !account}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <span className="text-xl">✨</span>
+              {isMinting ? 'Minting...' : account ? 'Connect Wallet to Mint' : 'Connect Wallet to Mint'}
+            </button>
           </div>
-        )}
-      </div>
 
-      {/* Footer Info */}
-      <div className="max-w-6xl mx-auto mt-12 bg-black/30 rounded-xl p-6 border border-purple-500/30">
-        <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-          <Sparkles className="text-yellow-400" size={20} />
-          How RelationNFT Works
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="font-semibold text-purple-300 mb-2">1. Build Relationships</p>
-            <p className="text-white/70">Interact with others through tips, comments, and collaborations on Farcaster.</p>
-          </div>
-          <div>
-            <p className="font-semibold text-purple-300 mb-2">2. Unlock Milestones</p>
-            <p className="text-white/70">Hit achievement thresholds to unlock unique NFT minting opportunities.</p>
-          </div>
-          <div>
-            <p className="font-semibold text-purple-300 mb-2">3. Mint & Earn</p>
-            <p className="text-white/70">Create dual NFTs with your partners, gain utility, and build your collection.</p>
+          {/* First Supporter Card */}
+          <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-xl rounded-3xl p-6 border border-purple-500/30">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h4 className="text-2xl font-bold mb-2 text-purple-300">
+                  First Supporter
+                </h4>
+                <p className="text-gray-200 mb-4">with @nftcollector</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Est. Value:</span>
+                  <span className="text-2xl font-bold text-green-400">
+                    $10-15
+                  </span>
+                </div>
+              </div>
+              <div className="bg-green-500 text-white text-sm font-bold px-4 py-1 rounded-full">
+                Ready!
+              </div>
+            </div>
+            
+            {/* FIXED BUTTON - İngilizce */}
+            <button 
+              onClick={mintNFT}
+              disabled={isMinting || !account}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <span className="text-xl">✨</span>
+              {isMinting ? 'Minting...' : 'Connect Wallet to Mint'}
+            </button>
           </div>
         </div>
-      </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mt-4 bg-red-900/30 border border-red-500 rounded-2xl p-4">
+            <p className="text-red-200 text-center">{error}</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
