@@ -26,13 +26,11 @@
     "license": "MIT",
     "privacyPolicyUrl": "https://relationnft.vercel.app/privacy",
     "tags": ["social","nft","blockchain","farcaster","base"],
-    "screenshotUrls": ["https://relationnft.vercel.app/image.png","https://relationnft.vercel.app/splash.png"],
+    "screenshotUrls": [
+      "https://relationnft.vercel.app/image.png",
+      "https://relationnft.vercel.app/splash.png"
+    ],
     "noindex": false,
     "primaryCategory": "social"
-  },
-  "baseBuilder": {
-    "allowedAddresses": [
-      "0x5c0834E86c197b10d583940EC6366EFaA2e93B1e"
-    ]
   }
 }
