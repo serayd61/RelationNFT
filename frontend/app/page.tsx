@@ -202,7 +202,7 @@ if (!isReady) {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-black/30 rounded-lg p-4 text-center">
               <Users className="mx-auto mb-2 text-blue-400" size={24} />
               <p className="text-2xl font-bold">{userStats.totalRelationships}</p>
