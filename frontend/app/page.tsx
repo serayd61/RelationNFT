@@ -6,6 +6,35 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useMiniApp } from './hooks/useMiniApp';
 
+type RelationshipStatus = 'minted' | 'ready' | 'progress';
+
+interface Relationship {
+  id: number;
+  username: string;
+  avatar: string;
+  interactions: number;
+  tipsExchanged: number;
+  nftStatus: RelationshipStatus;
+  nftType: string | null;
+  firstInteraction: string;
+  milestone: string | null;
+}
+
+interface Milestone {
+  name: string;
+  progress: number;
+  unlocked: boolean;
+}
+
+interface PendingNFT {
+  id: number;
+  partner: string;
+  type: string;
+  description: string;
+  readyToMint: boolean;
+  estimatedValue: string;
+}
+
 export default function RelationNFTApp() {
   const { address, isConnected } = useAccount();
   const { isReady, context } = useMiniApp();
@@ -18,9 +47,9 @@ export default function RelationNFTApp() {
     totalTipsReceived: 0
   });
   
-  const [relationships, setRelationships] = useState([]);
-  const [milestones, setMilestones] = useState([]);
-  const [pendingNFTs, setPendingNFTs] = useState([]);
+  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [pendingNFTs, setPendingNFTs] = useState<PendingNFT[]>([]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -97,12 +126,12 @@ export default function RelationNFTApp() {
     }, 500);
   }, []);
 
-  const handleMintNFT = async (nftId) => {
+  const handleMintNFT = async (nftId: number) => {
     alert(`🎨 Minting NFT #${nftId}...\n\nThis will create a dual NFT for both you and your partner!\n\nEstimated gas fee: $0.50 on Base Network`);
   };
 
-  const NFTCard = ({ relationship }) => {
-    const getStatusColor = (status) => {
+  const NFTCard = ({ relationship }: { relationship: Relationship }) => {
+    const getStatusColor = (status: RelationshipStatus) => {
       if (status === 'minted') return 'bg-green-500';
       if (status === 'ready') return 'bg-yellow-500';
       return 'bg-gray-400';
@@ -110,7 +139,7 @@ export default function RelationNFTApp() {
    
 
 
-    const getStatusText = (status) => {
+    const getStatusText = (status: RelationshipStatus) => {
       if (status === 'minted') return 'NFT Minted';
       if (status === 'ready') return 'Ready to Mint';
       return 'In Progress';
