@@ -9,28 +9,40 @@
     "name": "RelationNFT",
     "author": "relationnft",
     "authorUrl": "https://warpcast.com/relationnft",
+    "publisherFid": 208646,
     "description": "Mint dual NFTs that celebrate Farcaster relationships. Hit milestones with friends and unlock collectibles that immortalize your connections on-chain.",
-    "iconUrl": "https://relationnft.vercel.app/icon.png",
+    "iconUrl": "https://relationnft.vercel.app/icon.png?v=1&force=rnft",
     "homeUrl": "https://relationnft.vercel.app/",
-    "imageUrl": "https://relationnft.vercel.app/image.png",
-    "splashImageUrl": "https://relationnft.vercel.app/splash.png",
+    "imageUrl": "https://relationnft.vercel.app/image.png?v=1&force=rnft",
+    "splashImageUrl": "https://relationnft.vercel.app/splash.png?v=1&force=rnft",
     "splashBackgroundColor": "#5b21b6",
     "subtitle": "NFT your connections",
-    "heroImageUrl": "https://relationnft.vercel.app/image.png",
+    "heroImageUrl": "https://relationnft.vercel.app/image.png?v=1&force=rnft",
     "tagline": "Every connection matters",
     "ogTitle": "Farcaster Relationship NFTs",
     "ogDescription": "Transform your Farcaster connections into valuable NFTs on Base",
-    "ogImageUrl": "https://relationnft.vercel.app/image.png",
-    "castShareUrl": "https://warpcast.com/~/compose?text=Check%20out%20RelationNFT%20https%3A%2F%2Frelationnft.vercel.app",
+    "ogImageUrl": "https://relationnft.vercel.app/og-image-1200x630.jpeg?v=1&force=rnft",
+    "castShareUrl": "https://relationnft.vercel.app/share?v=1&force=rnft",
     "webhookUrl": "https://relationnft.vercel.app/api/webhook",
     "license": "MIT",
     "privacyPolicyUrl": "https://relationnft.vercel.app/privacy",
-    "tags": ["social","nft","blockchain","farcaster","base"],
+    "tags": [
+      "social",
+      "nft",
+      "blockchain",
+      "farcaster",
+      "base"
+    ],
     "screenshotUrls": [
-      "https://relationnft.vercel.app/image.png",
-      "https://relationnft.vercel.app/splash.png"
+      "https://relationnft.vercel.app/image.png?v=1&force=rnft",
+      "https://relationnft.vercel.app/splash.png?v=1&force=rnft"
     ],
     "noindex": false,
     "primaryCategory": "social"
+  },
+  "baseBuilder": {
+    "allowedAddresses": [
+      "0x5c0834E86c197b10d583940EC6366EFaA2e93B1e"
+    ]
   }
 }
