@@ -2,6 +2,7 @@ const express = require('express');
 const { ethers } = require('ethers');
 const axios = require('axios');
 const cors = require('cors');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
@@ -14,6 +15,7 @@ const FARCASTER_HUB_URL = process.env.FARCASTER_HUB_URL || 'https://hub.farcaste
 const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const PRIVATE_KEY = process.env.ORACLE_PRIVATE_KEY || process.env.DEPLOYER_PRIVATE_KEY;
+const MINT_REQUEST_SECRET = process.env.MINT_REQUEST_SECRET;
 
 // Initialize blockchain connection (optional for development)
 let provider = null;
@@ -83,6 +85,25 @@ app.get('/api/relationship/:user1/:user2', async (req, res) => {
 
 app.post('/api/mint', async (req, res) => {
   try {
+    if (!MINT_REQUEST_SECRET) {
+      return res.status(503).json({ error: 'Minting temporarily unavailable.' });
+    }
+
+    const providedSecret = req.get('x-mint-secret');
+    if (!providedSecret) {
+      return res.status(401).json({ error: 'Missing mint authentication token.' });
+    }
+
+    const expectedSecretBuffer = Buffer.from(MINT_REQUEST_SECRET, 'utf8');
+    const providedSecretBuffer = Buffer.from(providedSecret, 'utf8');
+
+    if (
+      expectedSecretBuffer.length !== providedSecretBuffer.length ||
+      !crypto.timingSafeEqual(expectedSecretBuffer, providedSecretBuffer)
+    ) {
+      return res.status(403).json({ error: 'Invalid mint authentication token.' });
+    }
+
     const {
       user1,
       user2,
