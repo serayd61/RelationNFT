@@ -89,8 +89,6 @@ export const metadata: Metadata = {
   applicationName: "RelationNFT",
   authors: [{ name: "relationnft", url: "https://warpcast.com/relationnft" }],
   
-  // Theme color matching splash screen
-  themeColor: "#5b21b6",
 };
 
 // Viewport must be exported separately in Next.js 14+
@@ -98,6 +96,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  themeColor: "#5b21b6",
 };
 
 export default function RootLayout({

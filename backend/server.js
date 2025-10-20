@@ -2,6 +2,7 @@ const express = require('express');
 const { ethers } = require('ethers');
 const axios = require('axios');
 const cors = require('cors');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
@@ -14,17 +15,33 @@ const FARCASTER_HUB_URL = process.env.FARCASTER_HUB_URL || 'https://hub.farcaste
 const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const PRIVATE_KEY = process.env.ORACLE_PRIVATE_KEY || process.env.DEPLOYER_PRIVATE_KEY;
+const MINT_REQUEST_SECRET = process.env.MINT_REQUEST_SECRET;
 
 // Initialize blockchain connection (optional for development)
 let provider = null;
 let wallet = null;
 let contract = null;
 
+const RELATION_NFT_ABI = [
+  'function mintRelationshipNFT(address user1, address user2, uint8 milestoneType, uint256 interactionCount, uint256 totalTipsExchanged, string metadataURI1, string metadataURI2) payable',
+  'function mintFee() view returns (uint256)',
+];
+
 if (PRIVATE_KEY && PRIVATE_KEY.startsWith('0x') && PRIVATE_KEY.length === 66) {
   try {
     provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
     wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     console.log('✅ Blockchain connected:', wallet.address);
+    if (CONTRACT_ADDRESS) {
+      try {
+        contract = new ethers.Contract(CONTRACT_ADDRESS, RELATION_NFT_ABI, wallet);
+        console.log('✅ Contract ready:', CONTRACT_ADDRESS);
+      } catch (contractError) {
+        console.log('⚠️  Failed to initialise contract:', contractError.message);
+      }
+    } else {
+      console.log('ℹ️  CONTRACT_ADDRESS env var not set. Mint requests will be simulated.');
+    }
   } catch (error) {
     console.log('⚠️  Blockchain connection error:', error.message);
   }
@@ -62,6 +79,81 @@ app.get('/api/relationship/:user1/:user2', async (req, res) => {
     const { user1, user2 } = req.params;
     res.json({ exists: true, relationship: {} });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/mint', async (req, res) => {
+  try {
+    if (!MINT_REQUEST_SECRET) {
+      return res.status(503).json({ error: 'Minting temporarily unavailable.' });
+    }
+
+    const providedSecret = req.get('x-mint-secret');
+    if (!providedSecret) {
+      return res.status(401).json({ error: 'Missing mint authentication token.' });
+    }
+
+    const expectedSecretBuffer = Buffer.from(MINT_REQUEST_SECRET, 'utf8');
+    const providedSecretBuffer = Buffer.from(providedSecret, 'utf8');
+
+    if (
+      expectedSecretBuffer.length !== providedSecretBuffer.length ||
+      !crypto.timingSafeEqual(expectedSecretBuffer, providedSecretBuffer)
+    ) {
+      return res.status(403).json({ error: 'Invalid mint authentication token.' });
+    }
+
+    const {
+      user1,
+      user2,
+      milestoneType,
+      interactionCount = 0,
+      totalTipsExchanged = '0',
+      metadataURI1 = '',
+      metadataURI2 = '',
+    } = req.body;
+
+    if (!user1 || !user2 || typeof milestoneType !== 'number') {
+      return res.status(400).json({ error: 'Missing required mint parameters.' });
+    }
+
+    if (!wallet || !contract) {
+      return res.json({
+        success: true,
+        simulated: true,
+        message: 'Mint simulated. Configure blockchain credentials for live minting.',
+      });
+    }
+
+    const mintFee = await contract.mintFee();
+    const totalFee = mintFee * 2n;
+    const interactionValue = BigInt(interactionCount);
+    const totalTipsValue = ethers.parseUnits(String(totalTipsExchanged), 18);
+
+    const tx = await contract.mintRelationshipNFT(
+      user1,
+      user2,
+      milestoneType,
+      interactionValue,
+      totalTipsValue,
+      metadataURI1,
+      metadataURI2,
+      {
+        value: totalFee,
+      }
+    );
+
+    const receipt = await tx.wait();
+
+    res.json({
+      success: true,
+      simulated: false,
+      transactionHash: receipt.hash,
+      blockNumber: receipt.blockNumber,
+    });
+  } catch (error) {
+    console.error('Mint error:', error);
     res.status(500).json({ error: error.message });
   }
 });

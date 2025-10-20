@@ -5,22 +5,75 @@ import { Sparkles, Users, Gift, TrendingUp, Award, Heart, Zap } from 'lucide-rea
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useMiniApp } from './hooks/useMiniApp';
+import { mintRelationshipNFT } from './lib/api';
+
+type RelationshipStatus = 'minted' | 'ready' | 'progress';
+
+type Relationship = {
+  id: number;
+  username: string;
+  avatar: string;
+  interactions: number;
+  tipsExchanged: number;
+  nftStatus: RelationshipStatus;
+  nftType: string | null;
+  firstInteraction: string;
+  milestone: string | null;
+  pendingNftId?: number;
+};
+
+type PendingNFT = {
+  id: number;
+  relationshipId: number;
+  partner: string;
+  partnerAddress: string;
+  type: string;
+  milestoneType: number;
+  description: string;
+  readyToMint: boolean;
+  estimatedValue: string;
+  interactionCount: number;
+  totalTipsExchanged: string;
+  metadataURI1: string;
+  metadataURI2: string;
+};
+
+type UserStats = {
+  totalRelationships: number;
+  nftsMinted: number;
+  topSupporter: string | null;
+  totalTipsGiven: number;
+  totalTipsReceived: number;
+};
+
+type Milestone = {
+  name: string;
+  progress: number;
+  unlocked: boolean;
+};
 
 export default function RelationNFTApp() {
   const { address, isConnected } = useAccount();
-  const { isReady, context } = useMiniApp();
+  const { isReady } = useMiniApp();
   const [activeTab, setActiveTab] = useState('overview');
-  const [userStats, setUserStats] = useState({
+  const [userStats, setUserStats] = useState<UserStats>({
     totalRelationships: 0,
     nftsMinted: 0,
     topSupporter: null,
     totalTipsGiven: 0,
     totalTipsReceived: 0
   });
-  
-  const [relationships, setRelationships] = useState([]);
-  const [milestones, setMilestones] = useState([]);
-  const [pendingNFTs, setPendingNFTs] = useState([]);
+
+  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [pendingNFTs, setPendingNFTs] = useState<PendingNFT[]>([]);
+  const [mintingMap, setMintingMap] = useState<Record<number, boolean>>({});
+
+  const setMintingState = (id: number, value: boolean) => {
+    setMintingMap((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const isMinting = (id: number) => Boolean(mintingMap[id]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -53,7 +106,8 @@ export default function RelationNFTApp() {
           nftStatus: 'ready',
           nftType: 'Co-Creator',
           firstInteraction: '2025-02-01',
-          milestone: 'Conversation Partners'
+          milestone: 'Conversation Partners',
+          pendingNftId: 1
         },
         {
           id: 3,
@@ -61,29 +115,44 @@ export default function RelationNFTApp() {
           avatar: '🎨',
           interactions: 67,
           tipsExchanged: 32.10,
-          nftStatus: 'progress',
+          nftStatus: 'ready',
           nftType: null,
           firstInteraction: '2025-03-10',
-          milestone: null
+          milestone: null,
+          pendingNftId: 2
         }
       ]);
 
       setPendingNFTs([
         {
           id: 1,
+          relationshipId: 2,
           partner: '@degenbuilder',
+          partnerAddress: '0x1234567890abcdef1234567890abcdef12345678',
           type: 'Conversation Partners',
+          milestoneType: 1,
           description: '50+ meaningful conversations',
           readyToMint: true,
-          estimatedValue: '$15-25'
+          estimatedValue: '$15-25',
+          interactionCount: 58,
+          totalTipsExchanged: '12.5',
+          metadataURI1: 'ipfs://relationnft/degenbuilder/primary',
+          metadataURI2: 'ipfs://relationnft/degenbuilder/partner'
         },
         {
           id: 2,
+          relationshipId: 3,
           partner: '@nftcollector',
+          partnerAddress: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
           type: 'First Supporter',
+          milestoneType: 0,
           description: 'Gave you your first $1+ tip',
           readyToMint: true,
-          estimatedValue: '$10-20'
+          estimatedValue: '$10-20',
+          interactionCount: 36,
+          totalTipsExchanged: '4.2',
+          metadataURI1: 'ipfs://relationnft/nftcollector/primary',
+          metadataURI2: 'ipfs://relationnft/nftcollector/partner'
         }
       ]);
 
@@ -97,11 +166,67 @@ export default function RelationNFTApp() {
     }, 500);
   }, []);
 
-  const handleMintNFT = async (nftId) => {
-    alert(`🎨 Minting NFT #${nftId}...\n\nThis will create a dual NFT for both you and your partner!\n\nEstimated gas fee: $0.50 on Base Network`);
+  const handleMintNFT = async (nft: PendingNFT) => {
+    if (!isConnected || !address) {
+      alert('Please connect your wallet before minting.');
+      return;
+    }
+
+    setMintingState(nft.id, true);
+
+    try {
+      const response = await mintRelationshipNFT({
+        user1: address,
+        user2: nft.partnerAddress,
+        milestoneType: nft.milestoneType,
+        interactionCount: nft.interactionCount,
+        totalTipsExchanged: nft.totalTipsExchanged,
+        metadataURI1: nft.metadataURI1,
+        metadataURI2: nft.metadataURI2,
+      });
+
+      setPendingNFTs((prev) => prev.filter((item) => item.id !== nft.id));
+      setRelationships((prev) =>
+        prev.map((rel) =>
+          rel.id === nft.relationshipId
+            ? {
+                ...rel,
+                nftStatus: 'minted',
+                nftType: nft.type,
+                milestone: nft.type,
+              }
+            : rel
+        )
+      );
+      setUserStats((prev) => ({
+        ...prev,
+        nftsMinted: prev.nftsMinted + 1,
+      }));
+
+      const successMessage = response.simulated
+        ? 'Mint simulated successfully. Configure oracle credentials to enable live minting.'
+        : `Mint successful! Tx: ${response.transactionHash}`;
+
+      alert(`🎉 ${nft.type} NFT minted!\n\n${successMessage}`);
+    } catch (error: any) {
+      console.error('Mint error:', error);
+      alert(`Mint failed: ${error?.message || 'Unknown error occurred.'}`);
+    } finally {
+      setMintingState(nft.id, false);
+    }
   };
 
-  const NFTCard = ({ relationship }) => {
+  const NFTCard = ({
+    relationship,
+    onMint,
+    mintDisabled,
+    isProcessing,
+  }: {
+    relationship: Relationship;
+    onMint?: () => void;
+    mintDisabled?: boolean;
+    isProcessing?: boolean;
+  }) => {
     const getStatusColor = (status) => {
       if (status === 'minted') return 'bg-green-500';
       if (status === 'ready') return 'bg-yellow-500';
@@ -153,11 +278,16 @@ export default function RelationNFTApp() {
 
         {relationship.nftStatus === 'ready' && (
           <button
-            onClick={() => handleMintNFT(relationship.id)}
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 rounded-lg hover:from-pink-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2"
+            onClick={onMint}
+            disabled={!onMint || mintDisabled || isProcessing}
+            className={`w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 ${
+              !onMint || mintDisabled || isProcessing
+                ? 'opacity-60 cursor-not-allowed'
+                : 'hover:from-pink-600 hover:to-purple-600'
+            }`}
           >
             <Sparkles size={20} />
-            Mint Relationship NFT
+            {isProcessing ? 'Minting...' : 'Mint Relationship NFT'}
           </button>
         )}
 
@@ -180,7 +310,7 @@ if (!isReady) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 text-white p-4">
       {/* Header */}
-      <div className="max-w-6xl mx-auto mb-8">
+      <div className="w-full max-w-6xl mx-auto mb-8">
         <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -202,7 +332,7 @@ if (!isReady) {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
             <div className="bg-black/30 rounded-lg p-4 text-center">
               <Users className="mx-auto mb-2 text-blue-400" size={24} />
               <p className="text-2xl font-bold">{userStats.totalRelationships}</p>
@@ -228,8 +358,8 @@ if (!isReady) {
       </div>
 
       {/* Tabs */}
-      <div className="max-w-6xl mx-auto mb-6">
-        <div className="flex gap-2 bg-black/30 rounded-xl p-2">
+      <div className="w-full max-w-6xl mx-auto mb-6">
+        <div className="flex flex-wrap gap-2 bg-black/30 rounded-xl p-2">
           <button
             onClick={() => setActiveTab('overview')}
             className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
@@ -264,7 +394,7 @@ if (!isReady) {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full max-w-6xl mx-auto">
         {activeTab === 'overview' && (
           <div>
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -290,12 +420,20 @@ if (!isReady) {
                       <span className="text-lg font-bold text-green-400">{nft.estimatedValue}</span>
                     </div>
                     <button
-                      onClick={() => handleMintNFT(nft.id)}
-                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2"
-                      disabled={!isConnected}
+                      onClick={() => handleMintNFT(nft)}
+                      className={`w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 ${
+                        !isConnected || isMinting(nft.id)
+                          ? 'opacity-60 cursor-not-allowed'
+                          : 'hover:from-yellow-600 hover:to-orange-600'
+                      }`}
+                      disabled={!isConnected || isMinting(nft.id)}
                     >
                       <Sparkles size={20} />
-                      {isConnected ? 'Mint NFT Now' : 'Connect Wallet to Mint'}
+                      {!isConnected
+                        ? 'Connect Wallet to Mint'
+                        : isMinting(nft.id)
+                        ? 'Minting...'
+                        : 'Mint NFT Now'}
                     </button>
                   </div>
                 ))}
@@ -308,9 +446,21 @@ if (!isReady) {
 
             <h2 className="text-2xl font-bold mb-4">Recent Relationships</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relationships.slice(0, 3).map((rel) => (
-                <NFTCard key={rel.id} relationship={rel} />
-              ))}
+              {relationships.slice(0, 3).map((rel) => {
+                const pending = rel.pendingNftId
+                  ? pendingNFTs.find((nft) => nft.id === rel.pendingNftId)
+                  : undefined;
+
+                return (
+                  <NFTCard
+                    key={rel.id}
+                    relationship={rel}
+                    onMint={pending ? () => handleMintNFT(pending) : undefined}
+                    mintDisabled={!isConnected}
+                    isProcessing={pending ? isMinting(pending.id) : false}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
@@ -319,9 +469,21 @@ if (!isReady) {
           <div>
             <h2 className="text-2xl font-bold mb-4">All Relationships</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relationships.map((rel) => (
-                <NFTCard key={rel.id} relationship={rel} />
-              ))}
+              {relationships.map((rel) => {
+                const pending = rel.pendingNftId
+                  ? pendingNFTs.find((nft) => nft.id === rel.pendingNftId)
+                  : undefined;
+
+                return (
+                  <NFTCard
+                    key={rel.id}
+                    relationship={rel}
+                    onMint={pending ? () => handleMintNFT(pending) : undefined}
+                    mintDisabled={!isConnected}
+                    isProcessing={pending ? isMinting(pending.id) : false}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
