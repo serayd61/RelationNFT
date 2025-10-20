@@ -21,7 +21,7 @@ const config = getDefaultConfig({
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // QueryClient'i useState ile oluştur - her render'da yeni instance oluşturulmasını engeller
+  // Initialize QueryClient with useState to avoid creating a new instance on each render
   const [queryClient] = useState(() => new QueryClient());
 
   return (
