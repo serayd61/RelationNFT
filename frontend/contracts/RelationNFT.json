@@ -1,0 +1,72 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        { "internalType": "address", "name": "user1", "type": "address" },
+        { "internalType": "address", "name": "user2", "type": "address" },
+        { "internalType": "uint8", "name": "milestoneType", "type": "uint8" },
+        { "internalType": "uint256", "name": "interactionCount", "type": "uint256" },
+        { "internalType": "uint256", "name": "totalTipsExchanged", "type": "uint256" },
+        { "internalType": "string", "name": "metadataURI1", "type": "string" },
+        { "internalType": "string", "name": "metadataURI2", "type": "string" }
+      ],
+      "name": "mintRelationshipNFT",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+      "name": "getRelationshipDetails",
+      "outputs": [
+        {
+          "components": [
+            { "internalType": "address", "name": "user1", "type": "address" },
+            { "internalType": "address", "name": "user2", "type": "address" },
+            { "internalType": "uint8", "name": "milestoneType", "type": "uint8" },
+            { "internalType": "uint8", "name": "rarity", "type": "uint8" },
+            { "internalType": "uint256", "name": "interactionCount", "type": "uint256" },
+            { "internalType": "uint256", "name": "totalTipsExchanged", "type": "uint256" },
+            { "internalType": "uint256", "name": "mintedAt", "type": "uint256" },
+            { "internalType": "string", "name": "metadataURI", "type": "string" },
+            { "internalType": "uint256", "name": "pairedTokenId", "type": "uint256" }
+          ],
+          "internalType": "struct RelationNFT.RelationshipNFT",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+      "name": "getUserNFTs",
+      "outputs": [{ "internalType": "uint256[]", "name": "", "type": "uint256[]" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mintFee",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_newOracle", "type": "address" }],
+      "name": "setFarcasterOracle",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_newFee", "type": "uint256" }],
+      "name": "setMintFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}
+
