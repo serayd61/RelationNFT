@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import Providers from "./providers"; // eğer default export değilse { Providers } bırak
+import { Providers } from "./providers"; // eğer default export değilse { Providers } bırak
 
 // Base/Farcaster Mini App Embed (3:2 görsel, <10MB, https)
 const embed = {
