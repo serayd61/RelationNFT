@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import RelationNFTABI from '../contracts/RelationNFT.json';
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '';
 const BASE_RPC_URL = "https://mainnet.base.org";
 
 export default function Home() {
-  const [account, setAccount] = useState<string>('');
+  const [account, setAccount] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
 
   // Stats data (örnek - backend'den gelecek)
   const stats = {
@@ -49,7 +50,7 @@ export default function Home() {
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: baseChainId }],
           });
-        } catch (switchError: any) {
+        } catch (switchError) {
           if (switchError.code === 4902) {
             await window.ethereum.request({
               method: 'wallet_addEthereumChain',
@@ -68,7 +69,7 @@ export default function Home() {
           }
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Connection error:', err);
       setError(err.message || 'Failed to connect wallet');
     } finally {
@@ -85,10 +86,26 @@ export default function Home() {
         throw new Error('Please connect your wallet first');
       }
 
-      // Mint logic here
-      alert('NFT Minting initiated! 🎉');
-      
-    } catch (err: any) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, RelationNFTABI.abi, signer);
+
+      // Mint işlemi için gerekli parametreleri örnek olarak aşağıda belirtiyorum, sen gerçek backend/api verilerine göre güncellemelisin
+      const tx = await contract.mintRelationshipNFT(
+        account,               // user1
+        '0x0000000000000000000000000000000000000000', // user2 (örnek)
+        0,                    // milestoneType (örnek)
+        0,                    // interactionCount (örnek)
+        0,                    // totalTipsExchanged (örnek)
+        'ipfs://metadataURI1', // metadataURI1 (örnek)
+        'ipfs://metadataURI2', // metadataURI2 (örnek)
+        { value: ethers.utils.parseEther('0.002') }
+      );
+
+      await tx.wait();
+
+      alert('NFT Mint successful!');
+    } catch (err) {
       console.error('Mint error:', err);
       setError(err.message || 'Failed to mint NFT');
     } finally {
@@ -98,7 +115,7 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.on('accountsChanged', (accounts: string[]) => {
+      window.ethereum.on('accountsChanged', (accounts) => {
         setAccount(accounts[0] || '');
       });
 
@@ -150,8 +167,8 @@ export default function Home() {
                 Immortalize Your Farcaster Connections
               </p>
             </div>
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-full transition-colors">
-              Connect Wallet
+            <button onClick={connectWallet} disabled={isConnecting} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-full transition-colors">
+              {isConnecting ? 'Connecting...' : 'Connect Wallet'}
             </button>
           </div>
 
@@ -246,7 +263,7 @@ export default function Home() {
               className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <span className="text-xl">✨</span>
-              {isMinting ? 'Minting...' : account ? 'Connect Wallet to Mint' : 'Connect Wallet to Mint'}
+              {isMinting ? 'Minting...' : account ? 'Mint NFT' : 'Connect Wallet to Mint'}
             </button>
           </div>
 
