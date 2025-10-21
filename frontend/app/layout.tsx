@@ -1,80 +1,71 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Providers } from "./providers";
+import { Providers } from "./providers"; // eğer default export değilse { Providers } bırak
 
-// Base Mini App Embed Configuration
+// Base/Farcaster Mini App Embed (3:2 görsel, <10MB, https)
 const embed = {
   version: "1",
-  imageUrl: "https://relationnft.vercel.app/image.png?v=1", // 3:2 aspect ratio, <10MB
+  imageUrl: "https://relationnft.vercel.app/image.png?v=1",
   button: {
     title: "Launch RelationNFT",
     action: {
-      type: "launch_frame",
-      name: "RelationNFT",
+      type: "launch_miniapp",                 // <- doğru değer
       url: "https://relationnft.vercel.app",
       splashImageUrl: "https://relationnft.vercel.app/splash.png?v=1",
-      splashBackgroundColor: "#5b21b6",
-    },
-  },
+      splashBackgroundColor: "#5b21b6"
+    }
+  }
 };
 
 export const metadata: Metadata = {
   title: "RelationNFT - NFT your connections",
   description:
     "Mint dual NFTs that celebrate Farcaster relationships. Hit milestones with friends and unlock collectibles that immortalize your connections on-chain.",
-  
   // Icons
   icons: {
     icon: "/icon.png?v=1",
-    apple: "/icon.png?v=1",
+    apple: "/icon.png?v=1"
   },
-
   // Open Graph
   openGraph: {
     title: "Farcaster Relationship NFTs",
-    description:
-      "Transform your Farcaster connections into valuable NFTs on Base",
+    description: "Transform your Farcaster connections into valuable NFTs on Base",
     url: "https://relationnft.vercel.app",
     siteName: "RelationNFT",
     images: [
       {
-        url: "https://relationnft.vercel.app/og-image.png?v=1",
+        url: "https://relationnft.vercel.app/image.png?v=1", // og-image.png yerine image.png
         width: 1200,
         height: 630,
-        alt: "RelationNFT - Farcaster Relationship NFTs",
-      },
+        alt: "RelationNFT - Farcaster Relationship NFTs"
+      }
     ],
     type: "website",
-    locale: "en_US",
+    locale: "en_US"
   },
-
   // Twitter Card
   twitter: {
     card: "summary_large_image",
     title: "Farcaster Relationship NFTs",
-    description:
-      "Transform your Farcaster connections into valuable NFTs on Base",
-    images: ["https://relationnft.vercel.app/og-image.png?v=1"],
-    creator: "@relationnft",
+    description: "Transform your Farcaster connections into valuable NFTs on Base",
+    images: ["https://relationnft.vercel.app/image.png?v=1"],
+    creator: "@relationnft"
   },
-
-  // Base Mini App specific metadata
+  // Mini App embed metaları
   other: {
-    // Primary miniapp metadata (new standard)
     "fc:miniapp": JSON.stringify(embed),
-    
-    // Backward compatibility
-    "fc:frame": JSON.stringify(embed),
-    
-    // Additional metadata for better discoverability
+    // Geri uyumluluk (eski istemciler)
+    "fc:frame": JSON.stringify({
+      ...embed,
+      button: {
+        ...embed.button,
+        action: { ...embed.button.action, type: "launch_frame" }
+      }
+    }),
     "fc:frame:image": "https://relationnft.vercel.app/image.png?v=1",
-    "fc:frame:image:aspect_ratio": "3:2",
+    "fc:frame:image:aspect_ratio": "3:2"
   },
-
-  // Manifest
   manifest: "/manifest.json",
-
-  // Keywords for SEO
   keywords: [
     "Farcaster",
     "NFT",
@@ -82,42 +73,23 @@ export const metadata: Metadata = {
     "Blockchain",
     "Social",
     "Relationships",
-    "Web3",
+    "Web3"
   ],
-
-  // App metadata
   applicationName: "RelationNFT",
   authors: [{ name: "relationnft", url: "https://warpcast.com/relationnft" }],
-  
-  // Theme color matching splash screen
-  themeColor: "#5b21b6",
+  themeColor: "#5b21b6"
 };
 
-// Viewport must be exported separately in Next.js 14+
+// Viewport (Next 14+ ayrı export)
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 1
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        {/* Preload critical assets */}
-        <link rel="preload" href="/icon.png?v=1" as="image" />
-        
-        {/* Additional meta tags for better compatibility */}
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="RelationNFT" />
-      </head>
+    <html lang="en"> {/* ✅ EN dil etiketi ekle */}
       <body>
         <Providers>{children}</Providers>
       </body>

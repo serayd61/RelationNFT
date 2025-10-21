@@ -21,9 +21,8 @@ const config = getDefaultConfig({
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // QueryClient'i useState ile oluştur - her render'da yeni instance oluşturulmasını engeller
   const [queryClient] = useState(() => new QueryClient());
-
+  
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
@@ -34,3 +33,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     </WagmiProvider>
   );
 }
+
+// Eğer layout.tsx'de default import kullanmak istersen bunu ekle
+export default Providers;
